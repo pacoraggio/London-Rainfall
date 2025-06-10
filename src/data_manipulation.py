@@ -89,9 +89,6 @@ def sort_and_highlight_dataframe(df, sort_column, columns_to_display,
         # Filter highlight_mapping to only include visible rows
         highlight_mapping = {k: v for k, v in highlight_mapping.items() if k < n_rows}
     
-   
-    
-
     # Define highlighting function with multiple colors
     def highlight_rows(s):
         if s.name in highlight_mapping:
@@ -100,7 +97,6 @@ def sort_and_highlight_dataframe(df, sort_column, columns_to_display,
             return ['' for _ in s]
     
     # Apply styling and return
-    
     if(add_rank == True):
         sorted_df = sorted_df[columns_to_display]
         sorted_df['Rank'] = sorted_df.index + 1
@@ -109,11 +105,28 @@ def sort_and_highlight_dataframe(df, sort_column, columns_to_display,
         cols.insert(1, 'Rank')
         sorted_df = sorted_df[cols]
 
+        sorted_df.rename(columns = {'year' : 'Year',
+                                'total_rainfall' : 'Total Rainfall (mm)', 
+                                'avg_rainfall' : 'Average Rainfall (mm)', 
+                                'median_rainfall' : 'Median Rainfall (mm)',
+                                'min_rainfall' : 'Min (mm)', 
+                                'max_rainfall' : 'Max (mm)', 
+                                'weather_year' : 'Reference Year'},
+                                inplace = True)
         styled_df = sorted_df.style.hide(axis='index').apply(highlight_rows, axis=1)
         return(styled_df)
-    
-    styled_df = sorted_df[columns_to_display].style.hide(axis='index').apply(highlight_rows, axis=1)
-    
+
+    sorted_df = sorted_df[columns_to_display]
+    sorted_df.rename(columns = {'year' : 'Year',
+                                'total_rainfall' : 'Total Rainfall (mm)', 
+                                'avg_rainfall' : 'Average Rainfall (mm)', 
+                                'median_rainfall' : 'Median Rainfall (mm)',
+                                'min_rainfall' : 'Min (mm)', 
+                                'max_rainfall' : 'Max (mm)', 
+                                'weather_year' : 'Reference Year'},
+                                inplace = True)
+
+    styled_df = sorted_df.style.hide(axis='index').apply(highlight_rows, axis=1)   
     return styled_df
 
 
