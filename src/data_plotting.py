@@ -28,14 +28,16 @@ def plot_rainfall(df,
     sns.set_theme(style="whitegrid")
     plt.figure(figsize=(12, 6))
 
-    ax = sns.barplot(x='year', 
-                y=feature, 
-                hue='year',
-                data=rainfall_se_start_year_latest_year,
-                palette=colors,
-                edgecolor='black',
-                errorbar=None,
-                legend=False);
+    ax = sns.barplot(
+        x='year',
+        y=feature,
+        hue='year',
+        data=rainfall_se_start_year_latest_year,
+        palette=colors,
+        edgecolor='black',
+        errorbar=None,
+        legend=False
+        );
     
     # Custom formatting
     for container in ax.containers:
