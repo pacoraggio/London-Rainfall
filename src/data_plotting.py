@@ -53,3 +53,51 @@ def plot_rainfall(df,
         ax.set_xticks(range(len(new_labels)))
         ax.set_xticklabels(new_labels, rotation=45, ha='center')
     plt.show()
+
+
+def plot_min_max_rainfall(df_rainfall, 
+                          start_year=None, 
+                          end_year=None,
+                          figsize=(12, 6)):
+    
+    df_data = df_rainfall[(df_rainfall['year']>=start_year) &
+                          (df_rainfall['year']<=end_year)]
+
+    print('test')
+    sns.set_style("whitegrid")
+    fig, ax = plt.subplots(figsize=figsize)
+    
+    plt.figure(figsize=(14, 7))
+
+    # Fill between min/max
+    ax.fill_between(df_data['year'], df_data['min_rainfall'], df_data['max_rainfall'], 
+                    alpha=0.2, color='gray', label='Range (Min-Max)')
+
+    # Plot extremes with thinner lines
+    ax.plot(df_data['year'], df_data['min_rainfall'], color='blue', linewidth=1.5, 
+            linestyle=':', alpha=0.8, label='Minimum')
+    ax.plot(df_data['year'], df_data['max_rainfall'], color='red', linewidth=1.5, 
+            linestyle=':', alpha=0.8, label='Maximum')
+
+    # Emphasize central tendencies
+    ax.plot(df_data['year'], df_data['avg_rainfall'], color='darkgreen', linewidth=1.5, 
+            label='Mean', marker='o', markersize=5, markerfacecolor='white', 
+            markeredgecolor='darkgreen', markeredgewidth=2)
+    ax.plot(df_data['year'], df_data['median_rainfall'], color='darkorange', linewidth=1.5, 
+            label='Median', marker='D', markersize=5, markerfacecolor='white', 
+            markeredgecolor='darkorange', markeredgewidth=2)
+
+    ax.set_xlabel('Year', fontsize=12)
+    ax.set_ylabel('Precipitation (mm)', fontsize=12)
+
+    # Create title with year range info
+    year_range = f"{df_data['year'].min()}-{df_data['year'].max()}"
+    ax.set_title(f'Annual Precipitation Analysis ({year_range})', fontsize=14, fontweight='bold')
+
+    # Right side of the plot (most common)
+    ax.legend(bbox_to_anchor=(1.0, 1.015), loc='upper left')
+    print('test')
+    # Adjust layout to prevent legend cutoff
+    plt.tight_layout()
+    return fig, ax
+    
