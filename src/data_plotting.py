@@ -10,7 +10,9 @@ def plot_rainfall(df,
                   feature = 'total_rainfall', 
                   special_year=2022, 
                   title_label ='Total Rainfall',
-                  year_shift = False):
+                  year_shift = False,
+                  fig_size = (12,6),
+                  rotation_x_label = 0):
 
     rainfall_se_start_year_latest_year = df[(df['year'] >= start_year) & (df['year'] <= latest_year)].copy()
     mean_previous_years = rainfall_se_start_year_latest_year[rainfall_se_start_year_latest_year['year'] < latest_year][feature].mean()
@@ -26,7 +28,7 @@ def plot_rainfall(df,
             colors[i] = 'orange'   # Color for last year
 
     sns.set_theme(style="whitegrid")
-    plt.figure(figsize=(12, 6))
+    plt.figure(figsize=fig_size)
 
     ax = sns.barplot(
         x='year',
@@ -45,6 +47,7 @@ def plot_rainfall(df,
     
     plt.title(f'{title_label} in South East England ({start_year}-{latest_year})', fontsize=16)
     plt.axhline(y=mean_previous_years, color='red', linestyle='--', linewidth=2, label=f'Mean: {mean_previous_years:.2f}');
+    plt.xticks(rotation=rotation_x_label)
 
     # Move legend to the right
     plt.legend(bbox_to_anchor=(1., 1), loc='upper left')
@@ -63,7 +66,6 @@ def plot_min_max_rainfall(df_rainfall,
     df_data = df_rainfall[(df_rainfall['year']>=start_year) &
                           (df_rainfall['year']<=end_year)]
 
-    print('test')
     sns.set_style("whitegrid")
     fig, ax = plt.subplots(figsize=figsize)
     
@@ -96,7 +98,6 @@ def plot_min_max_rainfall(df_rainfall,
 
     # Right side of the plot (most common)
     ax.legend(bbox_to_anchor=(1.0, 1.015), loc='upper left')
-    print('test')
     # Adjust layout to prevent legend cutoff
     plt.tight_layout()
     return fig, ax
