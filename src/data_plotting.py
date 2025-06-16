@@ -12,6 +12,7 @@ def plot_rainfall(df,
                   title_label ='Total Rainfall',
                   year_shift = False,
                   fig_size = (12,6),
+                  orientation = 'v',
                   rotation_x_label = 0):
 
     rainfall_se_start_year_latest_year = df[(df['year'] >= start_year) & (df['year'] <= latest_year)].copy()
@@ -38,7 +39,8 @@ def plot_rainfall(df,
         palette=colors,
         edgecolor='black',
         errorbar=None,
-        legend=False
+        legend=False,
+        orient=orientation
         );
     
     # Custom formatting
