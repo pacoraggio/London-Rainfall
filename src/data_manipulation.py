@@ -1,6 +1,16 @@
 import pandas as pd
 import numpy as np
 
+def transform_data_datetime(df):
+    df = df.copy()
+    df['datetime'] = pd.to_datetime(df['DATE'], format="%Y%m%d")
+    df['year'] = df['datetime'].dt.year
+    df['month int'] = df['datetime'].dt.month
+    df['month'] = df['datetime'].dt.strftime('%b')
+    df['day'] = df['datetime'].dt.day
+
+    return df
+
 def sort_and_highlight_dataframe(df, sort_column, columns_to_display, 
                                  highlight_condition=None, filter_condition=None,
                                  ascending=False, add_rank=True, 
