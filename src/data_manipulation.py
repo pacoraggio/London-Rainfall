@@ -1,9 +1,16 @@
 import pandas as pd
 import numpy as np
 
-def transform_data_datetime(df):
+def transform_data_datetime(df, date_column='DATE', datetime_format=True):   
     df = df.copy()
-    df['datetime'] = pd.to_datetime(df['DATE'], format="%Y%m%d")
+    if datetime_format:
+        df['year'] = df[date_column].dt.year
+        df['month int'] = df[date_column].dt.month
+        df['month'] = df[date_column].dt.strftime('%b')
+        df['day'] = df[date_column].dt.day
+
+        return df
+    df['datetime'] = pd.to_datetime(df[date_column], format="%Y%m%d")
     df['year'] = df['datetime'].dt.year
     df['month int'] = df['datetime'].dt.month
     df['month'] = df['datetime'].dt.strftime('%b')
