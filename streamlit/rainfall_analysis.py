@@ -3,29 +3,27 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 
-from src.data_visualization import plot_highlighted_bars_seaborn
+from src.data_management import load_data, process_data_for_year
+from src.data_visualization import create_dual_map_from_existing, plot_highlighted_bars_plotly, create_map_with_comparison, create_map_with_comparison_plotly
 
-from streamlit_folium import st_folium
-import folium
 
 st.set_page_config(
     page_title="London and Apulia Rainfall Analysis",
-    # page_icon="🚀",
+    page_icon="🌧️",
     layout="wide",  # This sets wide mode
     initial_sidebar_state="expanded"
 )
 
+# st.set_page_config(
+#         page_title="Precipitation Analysis",
+#         page_icon="🌧️",
+#         layout="wide"
+#     )
+    
+st.title("London vs Apulia -- Annual Precipitation Analysis")
 
-@st.cache_data  # 
-def load_data(fname):
-    df = pd.read_parquet(fname)
-    df = df[df['year'] > df['year'].min()]
-    return(df)
-
-
-# london_yearly_mean = pd.read_parquet('./data/data_london_yearly_mean.parquet')
-london_yearly_mean = load_data('./data/data_london_yearly_mean.parquet')
-puglia_yearly_mean = load_data('./data/data_puglia_yearly_mean.parquet')
+london_yearly_mean, london_yearly_points = load_data('./data/data_london_yearly_mean.parquet', './data/london_yearly_points.parquet')
+puglia_yearly_mean, puglia_yearly_points = load_data('./data/data_puglia_yearly_mean.parquet', './data/puglia_yearly_points.parquet')
 
 london_yearly_mean['location'] = 'london'
 puglia_yearly_mean['location'] = 'apulia'
@@ -39,105 +37,90 @@ max_year = df_plot['year'].max()
 years = list(range(min_year, max_year))  # 2018 to 2025
 options = [None] + years
 
-col1, col2 = st.columns([0.2,0.8])
-with col1:
-    selected_year = st.selectbox(
+selected_year = st.sidebar.selectbox(
         "Select Year to Highlight:",
         options,
         index=0,  # Default to None
         format_func=lambda x: "   " if x is None else str(x)
     )
 
-if selected_year == None:
-    london_sum = np.int64(london_yearly_mean['yearly_tp_mm'].sum())
-    puglia_sum = np.int64(puglia_yearly_mean['yearly_tp_mm'].sum())
-    diff = np.round((london_yearly_mean['yearly_tp_mm'].sum() - puglia_yearly_mean['yearly_tp_mm'].sum()),0)
-else:
-    london_sum = np.round(london_yearly_mean[london_yearly_mean['year'] == selected_year]['yearly_tp_mm'].values[0],0)
-    puglia_sum = np.round(puglia_yearly_mean[puglia_yearly_mean['year'] == selected_year]['yearly_tp_mm'].values[0],0)
-    diff = np.round(london_sum - puglia_sum, 0)
 
+st.sidebar.markdown("---")
 
-col1, col2, col3, col4 = st.columns(4)
+show_map = st.sidebar.checkbox("Show on Map")
+
+col1, col2, col3 = st.columns([1, 3, 1])
+
 with col1:
-    if selected_year == None:
-        st.markdown("**London Total Precipitation**  \n(mm)")
-        metric_subtitle = 'Year range: '
-        st.metric(label = f"{metric_subtitle} {london_yearly_mean['year'].min()} to {london_yearly_mean['year'].max()}", 
-                value = london_sum,
-                delta=diff)
-    else:
-        st.markdown("**London Total Precipitation**  \n(mm)")
-        metric_subtitle = 'Year: '
-        st.metric(label = f"{metric_subtitle} {selected_year}", 
-                value = london_sum,
-                delta=diff)
-
-with col2:
-    if selected_year == None:
-        st.markdown("**Apulia Total Precipitation**  \n(mm)")
-        metric_subtitle = 'Year range: '
-        st.metric(label = f"{metric_subtitle} {puglia_yearly_mean['year'].min()} to {puglia_yearly_mean['year'].max()}", value = puglia_sum)
-    else:
-        st.markdown("**Apulia Total Precipitation**  \n(mm)")
-        metric_subtitle = 'Year: '
-        st.metric(label = f"{metric_subtitle} {selected_year}", 
-                  value = puglia_sum)
+    st.subheader("📈 Statistics")
+        
+    # Calculate statistics
+    london_data = df_plot[df_plot['location'] == 'london']['yearly_tp_mm']
+    apulia_data = df_plot[df_plot['location'] == 'apulia']['yearly_tp_mm']
     
-fig, ax = plot_highlighted_bars_seaborn(df_plot, selected_year=selected_year, figsize=(12,3))
-# Create columns to control width
-col1, col2, col3 = st.columns([0.1, 0.7, 0.2])
+    st.metric("London Avg", f"{london_data.mean():.1f} mm")
+    st.metric("Apulia Avg", f"{apulia_data.mean():.1f} mm")
+    st.metric("Difference", f"{london_data.mean() - apulia_data.mean():.1f} mm")
+
 with col2:
-    #st.pyplot(fig)
-    st.pyplot(fig,use_container_width=True)
+    # Create and display the chart
+    figsize = (600,400)
+    with st.spinner("Generating chart..."):
+        fig = plot_highlighted_bars_plotly(df_plot, selected_year, figsize)
+        
+        # Display the chart
+        st.plotly_chart(
+            fig, 
+            use_container_width=True,
+            config={
+                'displayModeBar': True,
+                'displaylogo': False,
+                'modeBarButtonsToRemove': ['pan2d', 'lasso2d', 'select2d'],
+                'toImageButtonOptions': {
+                    'format': 'png',
+                    'filename': 'precipitation_chart',
+                    'height': figsize[1],
+                    'width': figsize[0],
+                    'scale': 2
+                }
+            }
+        )
 
-# data = pd.read_pickle('./data/london_tp_daily_data.pkl')
-
-# data_london_yearly_sum_all_points = pd.read_parquet('./data/data_london_yearly_sum_all_points.parquet')
-
-# data = data[['date', 'year', 'month', 'day', 'tp_mm_daily_sum', 'month_int']]
-# years = np.sort(data_london_yearly_sum_all_points['year'].unique())
-# select_years = set(years)
-
-# option = st.selectbox(
-#     "Select Year",
-#     select_years,
-# )
-
-# london_yearly_tp_points = data_london_yearly_sum_all_points[data_london_yearly_sum_all_points['year'] == option]
-# tp_yearly_mean = london_yearly_tp_points['yearly_tp_mm'].mean()
-
-
-
-# # Create a base map centered on your data
-# center_lat = london_yearly_tp_points['latitude'].mean()
-# center_lon = london_yearly_tp_points['longitude'].mean()
-# m = folium.Map(location=[center_lat, center_lon], 
-#                zoom_start=10,
-#                min_zoom=10,
-#                max_zoom=10)
-
-# # Define color mapping based on tp_mm values
-# def get_color(tp_mm_value, tp_yearly_mean):
-#     if tp_mm_value < tp_yearly_mean:
-#         return 'orange'
-#     else:
-#         return 'blue'
-
-# # Add circles to the map
-# for idx, row in london_yearly_tp_points.iterrows():
-#     folium.CircleMarker(
-#         location=[row['latitude'], row['longitude']],
-#         radius=13,
-#         popup=f"{np.round(row['latitude'],1), np.round(row['longitude'],1)} \ntotal precipation (mm): {row['yearly_tp_mm']}",
-#         color=get_color(row['yearly_tp_mm'], tp_yearly_mean),
-#         fill=True,
-#         fillColor=get_color(row['yearly_tp_mm'], tp_yearly_mean),
-#         fillOpacity=0.7
-#     ).add_to(m)
+with col3:
+    if selected_year:
+        st.markdown(f"**{selected_year} Data:**")
+        year_data = df_plot[df_plot['year'] == selected_year]
+        for _, row in year_data.iterrows():
+            st.write(f"{row['location'].title()}: {row['yearly_tp_mm']:.1f} mm")
 
 
-# col1, col2 = st.columns(2)
-# with col1:
-#     st.metric(label = 'London Mean Total Precipitation (in mm)', value = np.round(tp_yearly_mean))
-#     st_folium(m, width=700, height=500)
+london_sum, puglia_yearly_tp_per_point, london_yearly_tp_per_point = process_data_for_year(
+    selected_year, london_yearly_mean, puglia_yearly_points, london_yearly_points
+)
+
+if show_map:
+    st.markdown("---")
+
+    fig = create_dual_map_from_existing(
+        london_yearly_tp_per_point, puglia_yearly_tp_per_point,
+        london_sum, london_sum,
+        zoom_start1=9, zoom_start2=7,
+        min_radius1=20, max_radius1=35,
+        min_radius2=15, max_radius2=25,
+        title1="London", title2="Puglia"
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+# Additional features
+st.markdown("---")
+with st.expander("ℹ️ About this visualization"):
+    st.markdown("""
+    This interactive chart shows annual precipitation data for London and Apulia:
+    
+    - **Interactive**: Hover over bars to see exact values
+    - **Highlighting**: Select a specific year to highlight in the sidebar
+    - **Download**: Use the camera icon in the chart toolbar to download as PNG
+    - **Zoom**: Use the zoom tools to focus on specific time periods
+    - **Legend**: Click location names to hide/show data series
+    """)
