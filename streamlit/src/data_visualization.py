@@ -577,3 +577,737 @@ def create_dual_map_from_existing(df1, df2, tp_threshold1, tp_threshold2,
     
     return subplot_fig
 
+
+import plotly.graph_objects as go
+
+
+def plot_monthly_aggregate_dynamic(df_plot, 
+                                   feature_label = 'Mean', 
+                                   bar_width = 0.35, 
+                                   location = 'London',
+                                   fig_width = 800,
+                                   fig_height = 400):
+    # Create figure
+    fig = go.Figure()
+
+    label_dict = {'Mean':'month_avg', 'Median':'month_median', 'Sum':'month_sum', 'Avg' :'month_avg', 'Average':'month_avg'}
+    feature = label_dict[feature_label]
+
+    months = df_plot['month'].values
+    mean_precip = df_plot[feature].values
+    min_precip = df_plot['month_min'].values
+    max_precip = df_plot['month_max'].values
+
+
+    # Add min-max range as a filled area
+    months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+            'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+    fig.add_trace(go.Scatter(
+        x=months + months[::-1],  # x: Jan to Dec and back from Dec to Jan
+        y=list(max_precip) + list(min_precip[::-1]),  # Upper bound + lower bound reversed
+        fill='toself',
+        fillcolor='rgba(135, 206, 250, 0.4)',  # Light blue with transparency
+        line=dict(color='rgba(255,255,255,0)'),  # No line
+        hoverinfo="skip",
+        showlegend=True,
+        name='Min-Max Range'
+    ))
+
+    # Add mean line
+    # fig.add_trace(go.Scatter(
+    #     x=months,
+    #     y=mean_precip,
+    #     mode='lines+markers',
+    #     name='Mean Precipitation',
+    #     line=dict(color='blue'),
+    #     marker=dict(size=6)
+    # ))
+
+    fig.add_trace(go.Bar(
+        x = months,
+        y = mean_precip,
+        name='Mean Precipitation',
+        marker=dict(
+            color='blue',
+            line=dict(width=0),
+            opacity=0.9
+        ),
+        width=bar_width
+    ))
+
+    # Layout
+    fig.update_layout(
+        title = f"Monthly {feature_label} Rainfall with Min-Max Range in {location}",
+        xaxis_title='Month',
+        yaxis_title='Precipitation (mm)',
+        template='plotly_white',
+        hovermode="x unified",
+        barmode='overlay',
+        barcornerradius=8,
+        width=fig_width,
+        height=fig_height,
+    )
+
+    return(fig)
+
+def plot_monthly_aggregate_dynamic_V2(df_plot, 
+                                   feature_label='Mean', 
+                                   bar_width=0.35, 
+                                   location='London',
+                                   fig_width=800,
+                                   fig_height=400):
+    fig = go.Figure()
+
+    # Label mapping
+    label_dict = {'Mean': 'month_avg', 'Median': 'month_median', 'Sum': 'month_sum', 'Avg': 'month_avg', 'Average': 'month_avg'}
+    feature = label_dict[feature_label]
+
+    # Months and data
+    months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+              'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+    mean_precip = df_plot[feature].values
+    min_precip = df_plot['month_min'].values
+    max_precip = df_plot['month_max'].values
+
+    # --- Min-Max filled area ---
+    fig.add_trace(go.Scatter(
+        x=months + months[::-1],  # Jan→Dec + Dec→Jan
+        y=list(max_precip) + list(min_precip[::-1]),
+        fill='toself',
+        fillcolor='rgba(135, 206, 250, 0.3)',  # Transparent blue
+        line=dict(color='rgba(255,255,255,0)'),  # No border line
+        hoverinfo='skip',
+        showlegend=True,
+        name='Min-Max Range'
+    ))
+
+    # --- Bar for Mean/Median/Sum ---
+    fig.add_trace(go.Bar(
+        x=months,
+        y=mean_precip,
+        name=f'{feature_label} Precipitation',
+        marker=dict(
+            color='blue',
+            opacity=0.9
+        ),
+        width=bar_width
+    ))
+
+    # --- Scatter for Min ---
+    fig.add_trace(go.Scatter(
+        x=months,
+        y=min_precip,
+        mode='markers',
+        name='Min',
+        marker=dict(
+            symbol='circle',
+            color='dodgerblue',
+            size=8
+        )
+    ))
+
+    # --- Scatter for Max ---
+    fig.add_trace(go.Scatter(
+        x=months,
+        y=max_precip,
+        mode='markers',
+        name='Max',
+        marker=dict(
+            symbol='diamond',
+            color='darkblue',
+            size=8
+        )
+    ))
+
+    # --- Layout with grid ---
+    fig.update_layout(
+        title=f"Monthly {feature_label} Rainfall with Min-Max Range in {location}",
+        xaxis_title='Month',
+        yaxis_title='Precipitation (mm)',
+        template='plotly_white',
+        hovermode="x unified",
+        barmode='overlay',
+        barcornerradius=8,
+        width=fig_width,
+        height=fig_height,
+        xaxis=dict(
+            showgrid=True,
+            gridcolor='lightgray'
+        ),
+        yaxis=dict(
+            showgrid=True,
+            gridcolor='lightgray'
+        ),
+    )
+
+    return fig
+
+def plot_monthly_aggregate_dynamic_V3(df_plot, 
+                                   feature_label='Mean', 
+                                   bar_width=0.35, 
+                                   location='London',
+                                   fig_width=800,
+                                   fig_height=400,
+                                   dark_mode=False):
+    fig = go.Figure()
+
+    # Label mapping
+    label_dict = {
+        'Mean': 'month_avg', 'Median': 'month_median',
+        'Sum': 'month_sum', 'Avg': 'month_avg', 'Average': 'month_avg'
+    }
+    feature = label_dict[feature_label]
+
+    # Consistent month order
+    months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+              'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+    mean_precip = df_plot[feature].values
+    min_precip = df_plot['month_min'].values
+    max_precip = df_plot['month_max'].values
+
+    # --- Colorblind-safe palette ---
+    bar_color = '#0072B2'        # royal blue
+    min_color = '#D55E00'        # vermillion
+    max_color = '#009E73'        # bluish green
+    fill_color = 'rgba(100, 100, 100, 0.2)' if not dark_mode else 'rgba(200, 200, 200, 0.2)'
+    grid_color = 'gray' if dark_mode else 'lightgray'
+    text_color = 'white' if dark_mode else 'black'
+
+    # --- Filled area ---
+    fig.add_trace(go.Scatter(
+        x=months + months[::-1],
+        y=list(max_precip) + list(min_precip[::-1]),
+        fill='toself',
+        fillcolor=fill_color,
+        line=dict(color='rgba(0,0,0,0)'),
+        hoverinfo='skip',
+        showlegend=True,
+        name='Min-Max Range'
+    ))
+
+    # --- Bar plot ---
+    fig.add_trace(go.Bar(
+        x=months,
+        y=mean_precip,
+        name=f'{feature_label}',
+        marker=dict(
+            color=bar_color,
+            opacity=0.9
+        ),
+        width=bar_width,
+        hovertemplate=f'{feature_label}: %{{y:.1f}} mm<extra></extra>'
+    ))
+
+    # --- Min line+markers ---
+    fig.add_trace(go.Scatter(
+        x=months,
+        y=min_precip,
+        mode='lines+markers',
+        name='Min',
+        line=dict(color=min_color, width=2, dash='dot'),
+        marker=dict(symbol='circle', size=7, color=min_color),
+        hovertemplate=f'Min: %{{y:.1f}} mm<extra></extra>'
+    ))
+
+    # --- Max line+markers ---
+    fig.add_trace(go.Scatter(
+        x=months,
+        y=max_precip,
+        mode='lines+markers',
+        name='Max',
+        line=dict(color=max_color, width=2),
+        marker=dict(symbol='diamond', size=8, color=max_color),
+        hovertemplate=f'Max: %{{y:.1f}} mm<extra></extra>'
+    ))
+
+    # --- Layout ---
+    fig.update_layout(
+        title=f"Monthly {feature_label} Rainfall with Min-Max Range in {location}",
+        xaxis_title='Month',
+        yaxis_title='Precipitation (mm)',
+        template='plotly_dark' if dark_mode else 'plotly_white',
+        hovermode="x unified",
+        barmode='overlay',
+        barcornerradius=8,
+        width=fig_width,
+        height=fig_height,
+        font=dict(color=text_color),
+        xaxis=dict(
+            showgrid=True,
+            gridcolor=grid_color,
+            zeroline=False
+        ),
+        yaxis=dict(
+            showgrid=True,
+            gridcolor=grid_color,
+            zeroline=False
+        ),
+        legend=dict(
+            bgcolor='rgba(0,0,0,0)' if dark_mode else 'rgba(255,255,255,0)',
+            borderwidth=0
+        )
+    )
+
+    return fig
+
+
+def plot_monthly_aggregate_comparison(df1, df2,
+                                      label1='Dataset 1',
+                                      label2='Dataset 2',
+                                      feature_label='Mean',
+                                      bar_width=0.35,
+                                      location='Comparison',
+                                      fig_width=900,
+                                      fig_height=500,
+                                      dark_mode=False):
+    fig = go.Figure()
+
+    # Label mapping
+    label_dict = {'Mean': 'month_avg', 'Median': 'month_median',
+                  'Sum': 'month_sum', 'Avg': 'month_avg', 'Average': 'month_avg'}
+    feature = label_dict[feature_label]
+
+    # Shared months axis
+    months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+              'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+    # --- Colorblind-safe palette ---
+    # Dataset 1
+    bar_color1 = '#0072B2'     # royal blue
+    min_color1 = '#D55E00'     # vermillion
+    max_color1 = '#009E73'     # bluish green
+
+    # Dataset 2
+    bar_color2 = '#E69F00'     # orange
+    min_color2 = '#56B4E9'     # sky blue
+    max_color2 = '#CC79A7'     # reddish pink
+
+    fill_color = 'rgba(120, 120, 120, 0.15)' if not dark_mode else 'rgba(200, 200, 200, 0.15)'
+    grid_color = 'gray' if dark_mode else 'lightgray'
+    text_color = 'white' if dark_mode else 'black'
+
+    # --- Dataset 1 values ---
+    mean1 = df1[feature].values
+    min1 = df1['month_min'].values
+    max1 = df1['month_max'].values
+
+    # --- Dataset 2 values ---
+    mean2 = df2[feature].values
+    min2 = df2['month_min'].values
+    max2 = df2['month_max'].values
+
+    # === Dataset 1 ===
+    fig.add_trace(go.Scatter(
+        x=months + months[::-1],
+        y=list(max1) + list(min1[::-1]),
+        fill='toself',
+        fillcolor=fill_color,
+        line=dict(color='rgba(0,0,0,0)'),
+        hoverinfo='skip',
+        showlegend=True,
+        name=f'{label1} Min-Max Range'
+    ))
+
+    fig.add_trace(go.Bar(
+        x=months,
+        y=mean1,
+        name=f'{label1} {feature_label}',
+        marker=dict(color=bar_color1, opacity=0.85),
+        width=bar_width,
+        hovertemplate=f'{label1} {feature_label}: %{{y:.1f}}<extra></extra>'
+    ))
+
+    fig.add_trace(go.Scatter(
+        x=months,
+        y=min1,
+        mode='lines+markers',
+        name=f'{label1} Min',
+        line=dict(color=min_color1, width=2, dash='dot'),
+        marker=dict(symbol='circle', size=7, color=min_color1),
+        hovertemplate=f'{label1} Min: %{{y:.1f}}<extra></extra>'
+    ))
+
+    fig.add_trace(go.Scatter(
+        x=months,
+        y=max1,
+        mode='lines+markers',
+        name=f'{label1} Max',
+        line=dict(color=max_color1, width=2),
+        marker=dict(symbol='diamond', size=8, color=max_color1),
+        hovertemplate=f'{label1} Max: %{{y:.1f}}<extra></extra>'
+    ))
+
+    # === Dataset 2 ===
+    fig.add_trace(go.Scatter(
+        x=months + months[::-1],
+        y=list(max2) + list(min2[::-1]),
+        fill='toself',
+        fillcolor=fill_color,
+        line=dict(color='rgba(0,0,0,0)'),
+        hoverinfo='skip',
+        showlegend=True,
+        name=f'{label2} Min-Max Range'
+    ))
+
+    fig.add_trace(go.Bar(
+        x=months,
+        y=mean2,
+        name=f'{label2} {feature_label}',
+        marker=dict(color=bar_color2, opacity=0.85),
+        width=bar_width,
+        hovertemplate=f'{label2} {feature_label}: %{{y:.1f}}<extra></extra>'
+    ))
+
+    fig.add_trace(go.Scatter(
+        x=months,
+        y=min2,
+        mode='lines+markers',
+        name=f'{label2} Min',
+        line=dict(color=min_color2, width=2, dash='dot'),
+        marker=dict(symbol='circle', size=7, color=min_color2),
+        hovertemplate=f'{label2} Min: %{{y:.1f}}<extra></extra>'
+    ))
+
+    fig.add_trace(go.Scatter(
+        x=months,
+        y=max2,
+        mode='lines+markers',
+        name=f'{label2} Max',
+        line=dict(color=max_color2, width=2),
+        marker=dict(symbol='diamond', size=8, color=max_color2),
+        hovertemplate=f'{label2} Max: %{{y:.1f}}<extra></extra>'
+    ))
+
+    # === Layout ===
+    fig.update_layout(
+        title=f"Monthly {feature_label} Rainfall Comparison in {location}",
+        xaxis_title='Month',
+        yaxis_title='Precipitation (mm)',
+        template='plotly_dark' if dark_mode else 'plotly_white',
+        hovermode='x unified',
+        barmode='overlay',  # alternatives: 'group', 'relative'
+        barcornerradius=6,
+        width=fig_width,
+        height=fig_height,
+        font=dict(color=text_color),
+        xaxis=dict(
+            showgrid=True,
+            gridcolor=grid_color
+        ),
+        yaxis=dict(
+            showgrid=True,
+            gridcolor=grid_color
+        ),
+        legend=dict(
+            bgcolor='rgba(0,0,0,0)' if dark_mode else 'rgba(255,255,255,0)',
+            borderwidth=0
+        )
+    )
+
+    return fig
+
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+
+def plot_monthly_aggregate_stacked(df1, df2,
+                                   label1='Dataset 1',
+                                   label2='Dataset 2',
+                                   feature_label='Mean',
+                                   bar_width=0.35,
+                                   location='Comparison',
+                                   fig_width=900,
+                                   fig_height=800,
+                                   dark_mode=False):
+    # Setup subplots: 2 rows, shared x-axis
+    fig = make_subplots(rows=2, cols=1,
+                        shared_xaxes=True,
+                        vertical_spacing=0.1,
+                        subplot_titles=(f"{label1} Monthly {feature_label}", f"{label2} Monthly {feature_label}"))
+
+    label_dict = {'Mean': 'month_avg', 'Median': 'month_median',
+                  'Sum': 'month_sum', 'Avg': 'month_avg', 'Average': 'month_avg'}
+    feature = label_dict[feature_label]
+
+    months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+              'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+    # --- Colorblind-safe palette ---
+    bar_color1 = '#0072B2'; min_color1 = '#D55E00'; max_color1 = '#009E73'
+    bar_color2 = '#E69F00'; min_color2 = '#56B4E9'; max_color2 = '#CC79A7'
+    fill_color = 'rgba(120, 120, 120, 0.15)' if not dark_mode else 'rgba(200, 200, 200, 0.15)'
+    grid_color = 'gray' if dark_mode else 'lightgray'
+    text_color = 'white' if dark_mode else 'black'
+
+    # === Plot Dataset 1 ===
+    mean1 = df1[feature].values
+    min1 = df1['month_min'].values
+    max1 = df1['month_max'].values
+
+    fig.add_trace(go.Scatter(
+        x=months + months[::-1],
+        y=list(max1) + list(min1[::-1]),
+        fill='toself',
+        fillcolor=fill_color,
+        line=dict(color='rgba(0,0,0,0)'),
+        hoverinfo='skip',
+        showlegend=False,
+        name=f'{label1} Min-Max Range'
+    ), row=1, col=1)
+
+    fig.add_trace(go.Bar(
+        x=months,
+        y=mean1,
+        name=f'{label1} {feature_label}',
+        marker=dict(color=bar_color1, opacity=0.85),
+        width=bar_width,
+        hovertemplate=f'{label1} {feature_label}: %{{y:.1f}}<extra></extra>'
+    ), row=1, col=1)
+
+    fig.add_trace(go.Scatter(
+        x=months,
+        y=min1,
+        mode='lines+markers',
+        name=f'{label1} Min',
+        line=dict(color=min_color1, width=2, dash='dot'),
+        marker=dict(symbol='circle', size=7, color=min_color1),
+        hovertemplate=f'{label1} Min: %{{y:.1f}}<extra></extra>'
+    ), row=1, col=1)
+
+    fig.add_trace(go.Scatter(
+        x=months,
+        y=max1,
+        mode='lines+markers',
+        name=f'{label1} Max',
+        line=dict(color=max_color1, width=2),
+        marker=dict(symbol='diamond', size=8, color=max_color1),
+        hovertemplate=f'{label1} Max: %{{y:.1f}}<extra></extra>'
+    ), row=1, col=1)
+
+    # === Plot Dataset 2 ===
+    mean2 = df2[feature].values
+    min2 = df2['month_min'].values
+    max2 = df2['month_max'].values
+
+    fig.add_trace(go.Scatter(
+        x=months + months[::-1],
+        y=list(max2) + list(min2[::-1]),
+        fill='toself',
+        fillcolor=fill_color,
+        line=dict(color='rgba(0,0,0,0)'),
+        hoverinfo='skip',
+        showlegend=False,
+        name=f'{label2} Min-Max Range'
+    ), row=2, col=1)
+
+    fig.add_trace(go.Bar(
+        x=months,
+        y=mean2,
+        name=f'{label2} {feature_label}',
+        marker=dict(color=bar_color2, opacity=0.85),
+        width=bar_width,
+        hovertemplate=f'{label2} {feature_label}: %{{y:.1f}}<extra></extra>'
+    ), row=2, col=1)
+
+    fig.add_trace(go.Scatter(
+        x=months,
+        y=min2,
+        mode='lines+markers',
+        name=f'{label2} Min',
+        line=dict(color=min_color2, width=2, dash='dot'),
+        marker=dict(symbol='circle', size=7, color=min_color2),
+        hovertemplate=f'{label2} Min: %{{y:.1f}}<extra></extra>'
+    ), row=2, col=1)
+
+    fig.add_trace(go.Scatter(
+        x=months,
+        y=max2,
+        mode='lines+markers',
+        name=f'{label2} Max',
+        line=dict(color=max_color2, width=2),
+        marker=dict(symbol='diamond', size=8, color=max_color2),
+        hovertemplate=f'{label2} Max: %{{y:.1f}}<extra></extra>'
+    ), row=2, col=1)
+
+    # === Layout ===
+    fig.update_layout(
+        title=f"{feature_label} Monthly Rainfall in {location}",
+        xaxis_title='Month',
+        yaxis_title='Precipitation (mm)',
+        template='plotly_dark' if dark_mode else 'plotly_white',
+        hovermode='x unified',
+        width=fig_width,
+        height=fig_height,
+        font=dict(color=text_color),
+        xaxis=dict(showgrid=True, gridcolor=grid_color),
+        xaxis2=dict(showgrid=True, gridcolor=grid_color),
+        yaxis=dict(showgrid=True, gridcolor=grid_color),
+        yaxis2=dict(showgrid=True, gridcolor=grid_color),
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=-0.15,
+            xanchor="center",
+            x=0.5,
+            bgcolor='rgba(0,0,0,0)' if dark_mode else 'rgba(255,255,255,0)',
+            borderwidth=0
+        )
+    )
+
+    return fig
+
+def plot_monthly_aggregate_overlaid(df1, df2,
+                                    label1='Dataset 1',
+                                    label2='Dataset 2',
+                                    feature_label='Mean',
+                                    bar_width=0.35,
+                                    location='Comparison',
+                                    fig_width=1000,
+                                    fig_height=500,
+                                    dark_mode=False):
+    fig = go.Figure()
+
+    label_dict = {'Mean': 'month_avg', 'Median': 'month_median',
+                  'Sum': 'month_sum', 'Avg': 'month_avg', 'Average': 'month_avg'}
+    feature = label_dict[feature_label]
+
+    months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+              'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+    # Colorblind-safe palette
+    bar_color1 = '#0072B2'; min_color1 = '#D55E00'; max_color1 = '#009E73'
+    bar_color2 = '#E69F00'; min_color2 = '#56B4E9'; max_color2 = '#CC79A7'
+    fill_color1 = 'rgba(100, 100, 100, 0.1)'
+    fill_color2 = 'rgba(150, 150, 150, 0.1)'
+    grid_color = 'gray' if dark_mode else 'lightgray'
+    text_color = 'white' if dark_mode else 'black'
+
+    # Dataset 1 values
+    mean1 = df1[feature].values
+    min1 = df1['month_min'].values
+    max1 = df1['month_max'].values
+
+    # Dataset 2 values
+    mean2 = df2[feature].values
+    min2 = df2['month_min'].values
+    max2 = df2['month_max'].values
+
+    # --- Fill Areas (Optional) ---
+    fig.add_trace(go.Scatter(
+        x=months + months[::-1],
+        y=list(max1) + list(min1[::-1]),
+        fill='toself',
+        fillcolor=fill_color1,
+        line=dict(color='rgba(0,0,0,0)'),
+        hoverinfo='skip',
+        showlegend=True,
+        name=f'{label1} Min-Max Range'
+    ))
+
+    fig.add_trace(go.Scatter(
+        x=months + months[::-1],
+        y=list(max2) + list(min2[::-1]),
+        fill='toself',
+        fillcolor=fill_color2,
+        line=dict(color='rgba(0,0,0,0)'),
+        hoverinfo='skip',
+        showlegend=True,
+        name=f'{label2} Min-Max Range'
+    ))
+
+    # --- Bars for Dataset 1 ---
+    fig.add_trace(go.Bar(
+        x=months,
+        y=mean1,
+        name=f'{label1} {feature_label}',
+        marker=dict(color=bar_color1),
+        width=bar_width,
+        offsetgroup=0,
+        hovertemplate=f'{label1} {feature_label}: %{{y:.1f}}<extra></extra>'
+    ))
+
+    # --- Bars for Dataset 2 ---
+    fig.add_trace(go.Bar(
+        x=months,
+        y=mean2,
+        name=f'{label2} {feature_label}',
+        marker=dict(color=bar_color2),
+        width=bar_width,
+        offsetgroup=1,
+        hovertemplate=f'{label2} {feature_label}: %{{y:.1f}}<extra></extra>'
+    ))
+
+    # --- Min/Max lines for Dataset 1 ---
+    fig.add_trace(go.Scatter(
+        x=months,
+        y=min1,
+        mode='lines+markers',
+        name=f'{label1} Min',
+        line=dict(color=min_color1, width=2, dash='dot'),
+        marker=dict(symbol='circle', size=7, color=min_color1),
+        hovertemplate=f'{label1} Min: %{{y:.1f}}<extra></extra>'
+    ))
+
+    fig.add_trace(go.Scatter(
+        x=months,
+        y=max1,
+        mode='lines+markers',
+        name=f'{label1} Max',
+        line=dict(color=max_color1, width=2),
+        marker=dict(symbol='diamond', size=8, color=max_color1),
+        hovertemplate=f'{label1} Max: %{{y:.1f}}<extra></extra>'
+    ))
+
+    # --- Min/Max lines for Dataset 2 ---
+    fig.add_trace(go.Scatter(
+        x=months,
+        y=min2,
+        mode='lines+markers',
+        name=f'{label2} Min',
+        line=dict(color=min_color2, width=2, dash='dot'),
+        marker=dict(symbol='circle', size=7, color=min_color2),
+        hovertemplate=f'{label2} Min: %{{y:.1f}}<extra></extra>'
+    ))
+
+    fig.add_trace(go.Scatter(
+        x=months,
+        y=max2,
+        mode='lines+markers',
+        name=f'{label2} Max',
+        line=dict(color=max_color2, width=2),
+        marker=dict(symbol='diamond', size=8, color=max_color2),
+        hovertemplate=f'{label2} Max: %{{y:.1f}}<extra></extra>'
+    ))
+
+    # --- Layout ---
+    fig.update_layout(
+        title=f"{feature_label} Monthly Rainfall Comparison in {location}",
+        xaxis_title='Month',
+        yaxis_title='Precipitation (mm)',
+        template='plotly_dark' if dark_mode else 'plotly_white',
+        hovermode='x unified',
+        barmode='group',  # group instead of overlay
+        width=fig_width,
+        height=fig_height,
+        font=dict(color=text_color),
+        xaxis=dict(
+            showgrid=True,
+            gridcolor=grid_color,
+        ),
+        yaxis=dict(
+            showgrid=True,
+            gridcolor=grid_color,
+        ),
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=-0.3,
+            xanchor="center",
+            x=0.5,
+            bgcolor='rgba(0,0,0,0)' if dark_mode else 'rgba(255,255,255,0)'
+        )
+    )
+
+    return fig

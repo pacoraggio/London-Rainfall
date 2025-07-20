@@ -14,6 +14,11 @@ def load_data(fname_yearly_mean, fname_yearly_points):
     return(df_yearly_mean, df_yearly_points)
 
 
+@st.cache_data  # 
+def load_parquet_data(fname_parquet):
+    df_data = pd.read_parquet(fname_parquet)
+    return(df_data)
+
 # Cache the data processing function to avoid recomputing when maps rerun
 @st.cache_data
 def process_data_for_year(selected_year, london_yearly_mean, puglia_yearly_points, london_yearly_points):

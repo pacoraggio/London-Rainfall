@@ -4,6 +4,24 @@ import numpy as np
 
 from datetime import timedelta
 
+
+def create_list_lat_long(df_data):
+    lats = df_data['latitude'].unique()
+    lons = df_data['longitude'].unique()
+
+    lat_long = []
+
+    for lat in lats:
+        for lon in lons:
+            df = df_data[(df_data['latitude'] == lat) &
+                                    (df_data['longitude'] == lon)]
+            if df.shape[0] != 0:
+
+                lat_long.append((lat,lon))
+
+    return(lat_long)
+
+
 def create_tp_daily_summary(df_data, year = 2025, threshold = 0.1):
     # creating `tp_mm`
     df = df_data.copy()
