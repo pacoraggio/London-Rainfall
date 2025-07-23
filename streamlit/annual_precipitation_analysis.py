@@ -15,12 +15,13 @@ st.set_page_config(
 
 st.title("London vs Apulia -- Annual Precipitation Analysis")
 
-london_yearly_mean, london_yearly_points = load_data('./data/data_london_yearly_mean.parquet', './data/london_yearly_points.parquet')
-puglia_yearly_mean, puglia_yearly_points = load_data('./data/data_puglia_yearly_mean.parquet', './data/puglia_yearly_points.parquet')
+london_yearly_mean, london_yearly_points = load_data('./data/data_london_yearly_mean.parquet', './data/data_london_yearly_sum_all_points.parquet')
+puglia_yearly_mean, puglia_yearly_points = load_data('./data/data_puglia_yearly_mean.parquet', './data/data_puglia_yearly_sum_all_points.parquet')
 
 london_yearly_mean['location'] = 'london'
 puglia_yearly_mean['location'] = 'apulia'
 
+st.write(f"Data from {london_yearly_points['year'].min()} - to {london_yearly_points['year'].max()}")
 df_plot = pd.concat([london_yearly_mean, puglia_yearly_mean])
 
 # create selector
