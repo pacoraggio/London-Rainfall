@@ -1,0 +1,163 @@
+import streamlit as st
+import pandas as pd
+import numpy as np
+
+from src.data_management import load_data, process_data_for_year
+from src.data_visualization import create_dual_map_from_existing, plot_highlighted_bars_plotly, create_map_with_comparison, create_map_with_comparison_plotly
+
+def run_annual_precipitation():
+    st.title("London vs Apulia -- Annual Precipitation Analysis")
+    st.markdown("---")
+    london_yearly_mean, london_yearly_points = load_data('./data/data_london_yearly_mean.parquet', './data/data_london_yearly_sum_all_points.parquet')
+    puglia_yearly_mean, puglia_yearly_points = load_data('./data/data_puglia_yearly_mean.parquet', './data/data_puglia_yearly_sum_all_points.parquet')
+
+    london_yearly_mean['location'] = 'london'
+    puglia_yearly_mean['location'] = 'apulia'
+
+    # st.write(f"Data from {london_yearly_points['year'].min()} - to {london_yearly_points['year'].max()}")
+    df_plot = pd.concat([london_yearly_mean, puglia_yearly_mean])
+
+    # create selector
+    min_year = df_plot['year'].min()
+    max_year = df_plot['year'].max()
+
+    years = list(range(min_year, max_year))
+    options = ['2000-2025'] + years
+
+
+    #col1, col2, col3 = st.columns([1, 0.5, 5])
+    #with col1:
+        # selected_year = st.selectbox(
+        #     "Select Year to Highlight:",
+        #     options,
+        #     index=0,
+        #     format_func=lambda x: "   " if x is None else str(x)
+        # )
+
+    # with col3:
+    #     show_map = st.checkbox("Show on Map",
+    #                            help="Show on map rainfall data for each recorded points")
+
+    col1, col2, col3 = st.columns([1, 3, 1])
+
+    with col1:
+        # st.subheader("📈 Statistics")
+            
+        # # Calculate statistics
+        # london_data = df_plot[df_plot['location'] == 'london']['yearly_tp_mm']
+        # apulia_data = df_plot[df_plot['location'] == 'apulia']['yearly_tp_mm']
+
+        # st.metric("London Avg", f"{london_data.mean():.1f} mm")
+        # st.metric("Apulia Avg", f"{apulia_data.mean():.1f} mm")
+        # st.metric("Difference", f"{london_data.mean() - apulia_data.mean():.1f} mm")
+
+        st.write(f"")
+        st.write(f"")
+        st.write(f"")
+        # st.markdown("---")
+        st.write(f"Data from {london_yearly_points['year'].min()+1} to {london_yearly_points['year'].max()}")
+
+        selected_year = st.selectbox(
+            "Select Year to Highlight:",
+            options,
+            index=0,
+            format_func=lambda x: "   " if x is None else str(x)
+        )
+
+        show_map = st.checkbox("Show on Map",
+                                help="Show on map rainfall data for each recorded points")    
+
+    with col2:
+        # Create and display the chart
+        figsize = (600,400)
+        with st.spinner("Generating chart..."):
+            if selected_year == '2000-2025':
+                # Plot all data
+                fig = plot_highlighted_bars_plotly(df_plot, None, figsize)
+            else:
+                # Plot only the selected year
+                fig = plot_highlighted_bars_plotly(df_plot, selected_year, figsize)
+            
+            # Display the chart
+            st.plotly_chart(
+                fig, 
+                use_container_width=True,
+                config={
+                    'displayModeBar': True,
+                    'displaylogo': False,
+                    'modeBarButtonsToRemove': ['pan2d', 'lasso2d', 'select2d'],
+                    'toImageButtonOptions': {
+                        'format': 'png',
+                        'filename': 'precipitation_chart',
+                        'height': figsize[1],
+                        'width': figsize[0],
+                        'scale': 2
+                    }
+                }
+            )
+
+    with col3:
+        st.write(f"")
+        st.write(f"")
+        st.write(f"")
+        # st.markdown("---")
+        if selected_year == '2000-2025':
+            st.markdown("**All Years Data:**")
+            # Calculate statistics
+            london_data = df_plot[df_plot['location'] == 'london']['yearly_tp_mm']
+            apulia_data = df_plot[df_plot['location'] == 'apulia']['yearly_tp_mm']
+
+            st.metric("London Yearly Avg", f"{london_data.mean():.1f} mm")
+            st.metric("Apulia Yearly Avg", f"{apulia_data.mean():.1f} mm")
+            st.metric("Yearly Avg Difference", f"{london_data.mean() - apulia_data.mean():.1f} mm")
+        else:
+            st.markdown(f"**{selected_year} Data:**")
+            year_data = df_plot[df_plot['year'] == selected_year]
+            for _, row in year_data.iterrows():
+                # st.write(f"{row['location'].title()}: {row['yearly_tp_mm']:.1f} mm")
+                mean_diff = row['yearly_tp_mm'] - year_data[year_data['location'] != row['location']]['yearly_tp_mm'].values[0] 
+                st.metric(f"{row['location'].title()} Yearly Sum", 
+                        f"{row['yearly_tp_mm']:.1f} mm")
+            st.metric("Yearly Difference", f"{-mean_diff:.1f} mm")
+
+    if selected_year == '2000-2025':   
+        selected_year = None  # Reset to None if '2000-2025' is selected
+
+    london_sum, puglia_yearly_tp_per_point, london_yearly_tp_per_point = process_data_for_year(
+        selected_year, london_yearly_mean, puglia_yearly_points, london_yearly_points
+    )
+
+    if show_map:
+        st.markdown("---")
+
+        fig = create_dual_map_from_existing(
+            london_yearly_tp_per_point, puglia_yearly_tp_per_point,
+            london_sum, london_sum,
+            zoom_start1=9, zoom_start2=7,
+            min_radius1=20, max_radius1=35,
+            min_radius2=15, max_radius2=25,
+            title1="London", title2="Puglia"
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+
+    # Additional features
+    st.markdown("---")
+
+    with st.expander("Show Insights"):
+        st.markdown("""
+        - Form January 2000 to June 2025 included a total of
+        - How many years London area registered more rainfall than Apulia
+        - Which years Apulia registered more rainfall than London
+        """)
+
+    with st.expander("ℹ️ About this visualization"):
+        st.markdown("""
+        This interactive chart shows annual precipitation data for London and Apulia:
+        
+        - **Interactive**: Hover over bars to see exact values
+        - **Highlighting**: Select a specific year to highlight in the sidebar
+        - **Download**: Use the camera icon in the chart toolbar to download as PNG
+        - **Zoom**: Use the zoom tools to focus on specific time periods
+        - **Legend**: Click location names to hide/show data series
+        """)

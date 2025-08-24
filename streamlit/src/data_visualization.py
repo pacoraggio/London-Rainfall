@@ -1314,40 +1314,4 @@ def plot_monthly_aggregate_overlaid(df1, df2,
 
     fig.update_layout(**layout_params)
 
-    # fig.update_layout(
-    #     # title=f"{feature_label} Monthly Rainfall LND vs APL" if show_title else None,
-    #     xaxis_title='Month',
-    #     yaxis_title='Precipitation (mm)',
-    #     template='plotly_dark' if dark_mode else 'plotly_white',
-    #     hovermode='x unified',
-    #     barmode='group',  # group instead of overlay
-    #     width=fig_width,
-    #     height=fig_height,
-    #     font=dict(color=text_color),
-    #     xaxis=dict(
-    #         showgrid=True,
-    #         gridcolor=grid_color,
-    #     ),
-    #     yaxis=dict(
-    #         showgrid=True,
-    #         gridcolor=grid_color,
-    #     ),
-    #     legend=dict(
-    #         bgcolor='rgba(0,0,0,0)' if dark_mode else 'rgba(255,255,255,0)',
-    #         borderwidth=0
-    #     )
-    #     # legend=dict(
-    #     #     orientation="h",
-    #     #     yanchor="bottom",
-    #     #     y=-0.3,
-    #     #     xanchor="center",
-    #     #     x=0.5,
-    #     #     bgcolor='rgba(0,0,0,0)' if dark_mode else 'rgba(255,255,255,0)'
-    #     # )
-    # )
-
-    # if show_title:
-    #     layout_params['title'] = f"{feature_label} Monthly Rainfall Comparison in {location}"
-
-    # fig.update_layout(**layout_params)
     return fig
