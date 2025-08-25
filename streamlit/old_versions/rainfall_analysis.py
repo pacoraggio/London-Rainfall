@@ -14,11 +14,6 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# st.set_page_config(
-#         page_title="Precipitation Analysis",
-#         page_icon="🌧️",
-#         layout="wide"
-#     )
     
 st.title("London vs Apulia -- Annual Precipitation Analysis")
 
