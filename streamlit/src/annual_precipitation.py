@@ -24,33 +24,9 @@ def run_annual_precipitation():
     years = list(range(min_year, max_year))
     options = ['2000-2025'] + years
 
-
-    #col1, col2, col3 = st.columns([1, 0.5, 5])
-    #with col1:
-        # selected_year = st.selectbox(
-        #     "Select Year to Highlight:",
-        #     options,
-        #     index=0,
-        #     format_func=lambda x: "   " if x is None else str(x)
-        # )
-
-    # with col3:
-    #     show_map = st.checkbox("Show on Map",
-    #                            help="Show on map rainfall data for each recorded points")
-
     col1, col2, col3 = st.columns([1, 3, 1])
 
     with col1:
-        # st.subheader("📈 Statistics")
-            
-        # # Calculate statistics
-        # london_data = df_plot[df_plot['location'] == 'london']['yearly_tp_mm']
-        # apulia_data = df_plot[df_plot['location'] == 'apulia']['yearly_tp_mm']
-
-        # st.metric("London Avg", f"{london_data.mean():.1f} mm")
-        # st.metric("Apulia Avg", f"{apulia_data.mean():.1f} mm")
-        # st.metric("Difference", f"{london_data.mean() - apulia_data.mean():.1f} mm")
-
         st.write(f"")
         st.write(f"")
         st.write(f"")
