@@ -5,3 +5,4 @@ seaborn
 numpy
 plotly
 streamlit-aggrid
+streamlit_option_menu
