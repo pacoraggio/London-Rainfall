@@ -4,4 +4,4 @@ matplotlib
 seaborn
 numpy
 plotly
-st_aggrid
+streamlit-aggrid
