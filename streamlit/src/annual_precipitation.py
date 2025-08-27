@@ -8,8 +8,8 @@ from src.data_visualization import create_dual_map_from_existing, plot_highlight
 def run_annual_precipitation():
     st.title("London vs Apulia -- Annual Precipitation Analysis")
     st.markdown("---")
-    london_yearly_mean, london_yearly_points = load_data('./data/data_london_yearly_mean.parquet', './data/data_london_yearly_sum_all_points.parquet')
-    puglia_yearly_mean, puglia_yearly_points = load_data('./data/data_puglia_yearly_mean.parquet', './data/data_puglia_yearly_sum_all_points.parquet')
+    london_yearly_mean, london_yearly_points = load_data('/data/data_london_yearly_mean.parquet', '/data/data_london_yearly_sum_all_points.parquet')
+    puglia_yearly_mean, puglia_yearly_points = load_data('/data/data_puglia_yearly_mean.parquet', '/data/data_puglia_yearly_sum_all_points.parquet')
 
     london_yearly_mean['location'] = 'london'
     puglia_yearly_mean['location'] = 'apulia'
