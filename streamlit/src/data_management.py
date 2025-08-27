@@ -7,10 +7,9 @@ import numpy as np
 @st.cache_data  # 
 def load_data(fname_yearly_mean, fname_yearly_points):
     df_yearly_mean = pd.read_parquet(fname_yearly_mean)
-    df_yearly_mean = df_yearly_mean[df_yearly_mean['year'] > df_yearly_mean['year'].min()]
-
     df_yearly_points = pd.read_parquet(fname_yearly_points)
 
+    df_yearly_mean = df_yearly_mean[df_yearly_mean['year'] > df_yearly_mean['year'].min()]
     return(df_yearly_mean, df_yearly_points)
 
 
